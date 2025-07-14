@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClickUp Swag Checkout - Web MVP</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Inter font from Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Light gray background */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        /* Hide screens initially */
+        .screen {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+        }
+        .screen.active {
+            display: flex;
+        }
+        /* Button styling for consistent look */
+        .primary-btn {
+            /* Capsule 56px height, ClickUp Purple, white text 18px 600 */
+            /* Primary buttons centred full-width on mobile, 320 px centred on desktop. */
+            @apply w-full h-[56px] flex items-center justify-center bg-purple-600 hover:bg-purple-700 text-white text-lg font-semibold py-3 px-6 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105;
+        }
+        /* Desktop specific max-width for primary buttons */
+        @media (min-width: 768px) {
+            .primary-btn {
+                max-width: 320px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+        .secondary-btn {
+            /* Purple outline button for less prominence (ghost-button) */
+            @apply w-full bg-white hover:bg-purple-50 text-purple-600 border border-purple-600 font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105;
+        }
+        .edit-btn {
+            /* Subtle button for edit actions */
+            @apply text-purple-600 bg-purple-100 hover:bg-purple-200 font-semibold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 inline-flex items-center justify-center;
+        }
+        /* Input styling */
+        .form-input {
+            @apply mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500;
+        }
+        /* Inline error message for form fields */
+        .field-error {
+            @apply text-red-600 text-sm mt-1 hidden;
+        }
+        /* Order Summary styling */
+        .order-summary-card {
+            @apply bg-purple-50 p-4 rounded-xl shadow-inner w-full;
+        }
+        /* Desktop specific layout */
+        @media (min-width: 768px) {
+            .desktop-layout {
+                display: flex;
+                flex-direction: row; /* Side-by-side */
+            }
+            .desktop-main-content {
+                flex-grow: 1;
+                padding: 2rem; /* p-8 */
+            }
+            .desktop-sidebar {
+                width: 33.333333%; /* w-1/3 */
+                background-color: #f0f2f5; /* bg-purple-50 */
+                padding: 2rem; /* p-8 */
+                border-left: 1px solid #e0e0e0; /* border-l border-purple-100 */
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <!-- 
+        This T-shirt checkout MVP is designed as a validated blueprint for ClickUp's next-generation billing and payments experience.
+        By directly applying learnings from this focused exercise, our goal is to transform identified pain points into a strategic advantage.
+    -->
+    <div id="app" class="relative bg-white rounded-3xl shadow-xl overflow-hidden w-full max-w-5xl h-[90vh] flex flex-col">
+        <!-- Header - Removed purple background and shadow -->
+        <header class="text-gray-800 flex items-center justify-between p-4 rounded-t-3xl">
+            <button id="back-btn" class="text-gray-600 text-2xl font-bold" role="button" aria-label="Go back">&larr;</button>
+            <!-- Header title will now dynamically update based on screen -->
+            <h1 class="text-xl font-semibold" id="header-title">ClickUp Swag Store</h1>
+            <div class="w-6"></div> <!-- Spacer -->
+        </header>
+
+        <!-- Main Content Area - Desktop Layout Container -->
+        <main id="screen-container" class="flex-grow overflow-y-auto desktop-layout">
+
+            <!-- Left Column: Product Detail / Checkout Forms -->
+            <div id="left-column" class="desktop-main-content flex flex-col items-center">
+
+                <!-- 1. Product Listing / Sale Page -->
+                <div id="product-listing-screen" class="screen active flex-col items-center space-y-4 w-full max-w-lg">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Featured Swag</h2>
+                    <p class="text-gray-600 text-center text-sm mb-4">Available to shop online only at the moment.</p>
+                    <div class="w-full bg-white rounded-xl shadow-md overflow-hidden">
+                        <img src="https://placehold.co/600x300/6B46C1/FFFFFF?text=ClickUp+T-Shirt" alt="ClickUp T-Shirt" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h3 class="text-xl font-semibold text-gray-800">The Ultimate ClickUp Tee</h3>
+                            <p class="text-gray-600 text-sm mb-2">Show your love for productivity with our premium cotton ClickUp T-shirt.</p>
+                            <div class="flex justify-between items-center">
+                                <p class="text-2xl font-bold text-purple-700">$24.99</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- View Product button at bottom center -->
+                    <button id="view-product-btn" class="primary-btn mt-6" role="button">
+                        View Product
+                    </button>
+                </div>
+
+                <!-- 2. Product Detail Page -->
+                <div id="product-detail-screen" class="screen flex-col items-center space-y-4 w-full max-w-lg">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">The Ultimate ClickUp Tee</h2>
+                    <div class="w-full h-48 bg-gray-200 rounded-xl overflow-hidden flex items-center justify-center shadow-md">
+                        <img src="https://placehold.co/600x300/6B46C1/FFFFFF?text=ClickUp+T-Shirt" alt="ClickUp T-Shirt" class="object-cover w-full h-full">
+                    </div>
+                    <p class="text-gray-600 text-center px-2">Show your love for productivity with our premium cotton ClickUp T-shirt. Soft, stylish, and ready for your next big task!</p>
+                    <div class="flex items-center justify-center space-x-4 w-full">
+                        <div class="flex flex-col items-center">
+                            <label for="size-desktop" class="text-sm font-medium text-gray-700">Size:</label>
+                            <select id="size-desktop" class="form-input w-24">
+                                <option value="S">S</option>
+                                <option value="M">M</option>
+                                <option value="L" selected>L</option>
+                                <option value="XL">XL</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <label for="quantity-desktop" class="text-sm font-medium text-gray-700">Qty:</label>
+                            <input type="number" id="quantity-desktop" value="1" min="1" class="form-input w-20 text-center">
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold text-purple-700 mt-4">$24.99</p>
+                    <!-- Add to Cart button at bottom center -->
+                    <button id="add-to-cart-btn-desktop" class="primary-btn mt-6" role="button">
+                        Add to Cart
+                    </button>
+                </div>
+
+                <!-- 3. Cart Page -->
+                <div id="cart-screen" class="screen flex-col items-center space-y-4 w-full max-w-lg">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Your Cart</h2>
+                    <div class="w-full bg-white rounded-xl shadow-md overflow-hidden p-4">
+                        <div class="flex items-center justify-between border-b pb-3 mb-3 border-gray-200">
+                            <div class="flex items-center space-x-3">
+                                <img src="https://placehold.co/60x60/6B46C1/FFFFFF?text=Tee" alt="ClickUp T-Shirt" class="w-16 h-16 rounded-lg object-cover">
+                                <div>
+                                    <p class="font-semibold text-gray-800" id="cart-item-name">ClickUp Tee (L)</p>
+                                    <p class="text-gray-500 text-sm">Quantity: <span id="cart-item-qty">1</span></p>
+                                </div>
+                            </div>
+                            <p class="font-bold text-gray-800" id="cart-item-price">$24.99</p>
+                        </div>
+                        <div class="flex justify-between items-center mt-4">
+                            <span class="text-xl font-semibold text-gray-800">Subtotal:</span>
+                            <span class="text-xl font-bold text-purple-700" id="cart-subtotal">$24.99</span>
+                        </div>
+                    </div>
+                    <!-- Add More Items button on cart page -->
+                    <button id="add-more-items-main-btn" class="secondary-btn mt-6" role="button">
+                        Add More Items
+                    </button>
+                    <!-- Proceed to Checkout button at bottom center -->
+                    <button id="proceed-to-checkout-btn-desktop" class="primary-btn mt-6" role="button">
+                        Proceed to Checkout
+                    </button>
+                </div>
+
+                <!-- 3a. Empty Cart Page -->
+                <div id="empty-cart-screen" class="screen flex-col items-center justify-center text-center space-y-6 p-6 w-full max-w-lg">
+                    <svg class="w-24 h-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    <h2 class="text-2xl font-bold text-gray-800">Your Cart is Empty!</h2>
+                    <p class="text-gray-600 text-lg">Looks like you haven't added any swag yet.</p>
+                    <button id="learn-more-btn" class="primary-btn" role="button">
+                        Learn More
+                    </button>
+                </div>
+
+                <!-- 4. Checkout Options Screen -->
+                <div id="checkout-options-screen" class="screen flex-col items-center space-y-4 w-full max-w-lg">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Checkout</h2>
+                    <div class="w-full space-y-3 mt-4">
+                        <!-- Continue as Guest is primary-btn -->
+                        <button id="guest-checkout-btn-desktop" class="primary-btn" role="button">
+                            Continue as Guest
+                        </button>
+                        <div class="relative flex py-2 items-center">
+                            <div class="flex-grow border-t border-gray-300"></div>
+                            <span class="flex-shrink mx-4 text-gray-500">OR</span>
+                            <div class="flex-grow border-t border-gray-300"></div>
+                        </div>
+                        <!-- Log in is secondary-btn (ghost-button) -->
+                        <button id="login-create-account-btn" class="secondary-btn" role="button">
+                            Log in or Create a ClickUp Account
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4a. Login/Signup Screen -->
+                <div id="login-signup-screen" class="screen flex-col items-center space-y-6 w-full max-w-lg">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Welcome Back! Or Join Us.</h2>
+                    <p class="text-gray-600 text-center text-sm">
+                        **End of MVP Testing Flow:** For this prototype, this page demonstrates the entry point for account management. In a full application, you would authenticate and proceed to your account.
+                    </p>
+                    <form class="w-full space-y-4">
+                        <div>
+                            <label for="login-email" class="block text-sm font-medium text-gray-700">Email</label>
+                            <input type="email" id="login-email" placeholder="you@example.com" class="form-input" required>
+                        </div>
+                        <div>
+                            <label for="login-password" class="block text-sm font-medium text-gray-700">Password</label>
+                            <input type="password" id="login-password" placeholder="********" class="form-input">
+                        </div>
+                        <button type="submit" class="primary-btn" role="button">Log In</button>
+                    </form>
+                    <div class="relative flex py-2 items-center w-full">
+                        <div class="flex-grow border-t border-gray-300"></div>
+                        <span class="flex-shrink mx-4 text-gray-500">OR</span>
+                        <div class="flex-grow border-t border-gray-300"></div>
+                    </div>
+                    <button class="secondary-btn flex items-center justify-center space-x-2" role="button">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12.0003 4.75C14.0273 4.75 15.8073 5.448 17.1503 6.728L19.3303 4.548C17.5603 2.788 14.9503 1.75 12.0003 1.75C9.25033 1.75 6.82033 2.798 4.99033 4.588L7.20033 6.798C8.58033 5.488 10.2903 4.75 12.0003 4.75Z"/><path d="M22.25 12C22.25 11.01 22.16 10.06 22 9.13L22.99 7.16C23.63 8.44 24 10.11 24 12C24 13.91 23.5 15.67 22.62 17.18L20.57 15.17C21.43 14.07 22.25 12.91 22.25 12Z"/><path d="M4.58 17.18L2.53 19.2C3.91 20.71 5.86 21.75 8 21.75C10.75 21.75 13.18 20.702 15.01 18.892L12.79 16.682C11.41 18.002 9.70001 18.752 8.00001 18.752C5.97001 18.752 4.19001 18.054 2.85001 16.774L0.670008 18.954C2.44001 20.714 5.05001 21.752 8.00001 21.752Z"/><path d="M1.75 12C1.75 12.99 1.84 13.94 2 14.87L1.01 16.84C0.37 15.56 0 13.89 0 12C0 10.09 0.5 8.33 1.38 6.82L3.43 8.83C2.57 9.93 1.75 11.09 1.75 12Z"/></svg>
+                        Sign Up with Google
+                    </button>
+                    <button class="secondary-btn" role="button">Sign Up with Email</button>
+                    <button id="return-to-guest-checkout-btn" class="text-purple-600 hover:underline mt-4" role="button">Return to Guest Checkout</button>
+                </div>
+
+                <!-- 5. Shipping Information Screen -->
+                <div id="shipping-info-screen" class="screen flex-col items-center space-y-4 w-full max-w-lg">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Shipping Information</h2>
+                    <form id="shipping-form-desktop" class="w-full space-y-4">
+                        <div>
+                            <label for="full-name-desktop" class="block text-sm font-medium text-gray-700">Full Name</label>
+                            <input type="text" id="full-name-desktop" placeholder="John Doe" class="form-input" required>
+                            <p id="full-name-error" class="field-error">Please fill out this field.</p>
+                        </div>
+                        <div>
+                            <label for="address-line1-desktop" class="block text-sm font-medium text-gray-700">Address Line 1</label>
+                            <input type="text" id="address-line1-desktop" placeholder="123 Main St" class="form-input" required>
+                            <p id="address-line1-error" class="field-error">Please fill out this field.</p>
+                        </div>
+                        <div>
+                            <label for="address-line2-desktop" class="block text-sm font-medium text-gray-700">Address Line 2 (Optional)</label>
+                            <input type="text" id="address-line2-desktop" placeholder="Apt 4B" class="form-input">
+                        </div>
+                        <div class="flex space-x-4">
+                            <div class="flex-1">
+                                <label for="city-desktop" class="block text-sm font-medium text-gray-700">City</label>
+                                <input type="text" id="city-desktop" placeholder="Anytown" class="form-input" required>
+                                <p id="city-error" class="field-error">Please fill out this field.</p>
+                            </div>
+                            <div class="flex-1">
+                                <label for="state-desktop" class="block text-sm font-medium text-gray-700">State</label>
+                                <input type="text" id="state-desktop" placeholder="CA" class="form-input" maxlength="2" required>
+                                <p id="state-error" class="field-error">Please enter a 2-letter state code.</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="zip-code-desktop" class="block text-sm font-medium text-gray-700">Zip Code</label>
+                            <input type="text" id="zip-code-desktop" placeholder="90210" class="form-input" maxlength="5" required>
+                            <p id="zip-code-error" class="field-error">Please enter a 5-digit zip code.</p>
+                        </div>
+
+                        <!-- Shipping Address Logic - Radio Buttons -->
+                        <div class="mt-4 space-y-2">
+                            <p class="block text-sm font-medium text-gray-700">Billing Address:</p>
+                            <div class="flex items-center">
+                                <input type="radio" id="billing-same-as-shipping-radio" name="billing-address-option" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded" checked>
+                                <label for="billing-same-as-shipping-radio" class="ml-2 block text-sm text-gray-900">Same as Shipping Address</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="radio" id="billing-different-radio" name="billing-address-option" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
+                                <label for="billing-different-radio" class="ml-2 block text-sm text-gray-900">Different Billing Address</label>
+                            </div>
+                        </div>
+
+                        <!-- Continue to Payment button at bottom center -->
+                        <button type="submit" id="continue-to-payment-btn" class="primary-btn mt-6" role="button" disabled>
+                            Continue to Payment
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 6. Payment Information Screen -->
+                <div id="payment-info-screen" class="screen flex-col items-center space-y-4 w-full max-w-lg">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Payment Information</h2>
+                    <form id="payment-form-desktop" class="w-full space-y-4">
+                        <div>
+                            <label for="card-number-desktop" class="block text-sm font-medium text-gray-700">Card Number</label>
+                            <input type="text" id="card-number-desktop" placeholder="XXXX XXXX XXXX XXXX" class="form-input" required maxlength="19">
+                            <p id="card-number-error" class="field-error">Please enter a valid 16-digit card number.</p>
+                        </div>
+                        <div class="flex space-x-4">
+                            <div class="flex-1">
+                                <label for="expiry-date-desktop" class="block text-sm font-medium text-gray-700">Expiry (MM/YY)</label>
+                                <input type="text" id="expiry-date-desktop" placeholder="MM/YY" class="form-input" required maxlength="5">
+                                <p id="expiry-date-error" class="field-error">Invalid expiry date (MM/YY).</p>
+                            </div>
+                            <div class="flex-1">
+                                <label for="cvc-desktop" class="block text-sm font-medium text-gray-700">CVC</label>
+                                <input type="text" id="cvc-desktop" placeholder="XXX" class="form-input" required maxlength="4">
+                                <p id="cvc-error" class="field-error">Invalid CVC (3 or 4 digits).</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="card-name-desktop" class="block text-sm font-medium text-gray-700">Name on Card</label>
+                            <input type="text" id="card-name-desktop" placeholder="John Doe" class="form-input" required>
+                            <p id="card-name-error" class="field-error">Please fill out this field.</p>
+                        </div>
+
+                        <!-- Billing Address Fields - Conditional Display -->
+                        <div id="billing-address-fields" class="w-full space-y-4 hidden">
+                            <h3 class="text-lg font-semibold text-gray-800 mt-4">Billing Information</h3>
+                            <div>
+                                <label for="billing-address-line1" class="block text-sm font-medium text-gray-700">Address Line 1</label>
+                                <input type="text" id="billing-address-line1" placeholder="123 Main St" class="form-input">
+                                <p id="billing-address-line1-error" class="field-error">Please fill out this field.</p>
+                            </div>
+                            <div>
+                                <label for="billing-address-line2" class="block text-sm font-medium text-gray-700">Address Line 2 (Optional)</label>
+                                <input type="text" id="billing-address-line2" placeholder="Apt 4B" class="form-input">
+                            </div>
+                            <div class="flex space-x-4">
+                                <div class="flex-1">
+                                    <label for="billing-city" class="block text-sm font-medium text-gray-700">City</label>
+                                    <input type="text" id="billing-city" placeholder="Anytown" class="form-input">
+                                    <p id="billing-city-error" class="field-error">Please fill out this field.</p>
+                                </div>
+                                <div class="flex-1">
+                                    <label for="billing-state" class="block text-sm font-medium text-gray-700">State</label>
+                                    <input type="text" id="billing-state" placeholder="CA" class="form-input" maxlength="2">
+                                    <p id="billing-state-error" class="field-error">Please enter a 2-letter state code.</p>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="billing-zip-code" class="block text-sm font-medium text-gray-700">Zip Code</label>
+                                <input type="text" id="billing-zip-code" placeholder="90210" class="form-input" maxlength="5">
+                                <p id="billing-zip-code-error" class="field-error">Please enter a 5-digit zip code.</p>
+                            </div>
+                        </div>
+                        <!-- Review Order button at bottom center -->
+                        <button type="submit" id="review-order-btn" class="primary-btn mt-6" role="button" disabled>
+                            Review Order
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 7. Review Order Screen -->
+                <div id="review-order-screen" class="screen flex-col items-center space-y-4 w-full max-w-lg">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Review Your Order</h2>
+                    <div class="w-full bg-white rounded-xl shadow-md p-4 space-y-3">
+                        <h3 class="text-lg font-semibold text-gray-800">Shipping To:</h3>
+                        <p class="text-gray-700" id="review-shipping-name">John Doe</p>
+                        <p class="text-gray-700" id="review-shipping-address1">123 Main St, Apt 4B</p>
+                        <p class="text-gray-700" id="review-shipping-address2">Anytown, CA 90210</p>
+                        <!-- This button now uses the edit-btn styling -->
+                        <button id="edit-shipping-btn-desktop" class="edit-btn" role="button">Edit Shipping</button>
+                    </div>
+
+                    <div class="w-full bg-white rounded-xl shadow-md p-4 space-y-3">
+                        <h3 class="text-lg font-semibold text-gray-800">Payment Method:</h3>
+                        <p class="text-gray-700" id="review-payment-method">Visa ending in **** 1234</p>
+                        <p class="text-gray-700" id="review-billing-address-text"></p>
+                        <!-- This button now uses the edit-btn styling -->
+                        <button id="edit-payment-btn-desktop" class="edit-btn" role="button">Edit Payment</button>
+                    </div>
+
+                    <!-- Place Order button at bottom center -->
+                    <button id="place-order-btn-desktop" class="primary-btn mt-6" role="button">
+                        Place Order
+                    </button>
+                </div>
+
+                <!-- 8. Order Confirmation Screen -->
+                <div id="confirmation-screen" class="screen flex-col items-center justify-center text-center space-y-6 p-6 w-full max-w-lg">
+                    <svg class="w-24 h-24 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <h2 class="text-3xl font-bold text-gray-800">Order Confirmed!</h2>
+                    <p class="text-gray-600 text-lg">Your ClickUp Tee is on its way. You'll receive a confirmation email shortly.</p>
+                    <!-- Continue Shopping button at bottom center, non-interactive -->
+                    <button id="continue-shopping-btn" class="primary-btn" role="button">
+                        Continue Shopping
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Persistent Order Summary & Purchase Drivers -->
+            <div class="desktop-sidebar flex-col justify-start items-center">
+                <h3 class="text-2xl font-bold text-purple-800 mb-6" id="order-summary-title-sidebar">Your Cart Summary</h3>
+                <div class="order-summary-card mb-4">
+                    <div class="flex justify-between text-gray-700 text-base">
+                        <span>ClickUp Tee (<span id="summary-siz
